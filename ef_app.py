@@ -27,7 +27,7 @@ It identifies key optimal portfolios, individual asset risk-return profiles, and
 # ---------------------------------------------------------
 st.sidebar.header("Portfolio Parameters")
 
-default_tickers = "AAPL, MSFT, GOOGL, AMZN, NVDA"
+default_tickers = "SPY, BTC-USD, GC=F, QQQ, DIA"
 ticker_input = st.sidebar.text_input("Enter Tickers (comma separated):", value=default_tickers)
 tickers = [t.strip().upper() for t in ticker_input.split(",") if t.strip()]
 
