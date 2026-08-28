@@ -181,9 +181,6 @@ def portfolio_calmar_ratio(weights, returns, mean_returns):
     portfolio_return = np.sum(mean_returns * weights)
     return portfolio_return / max_drawdown
 
-def neg_calmar_ratio(weights, returns, mean_returns):
-    return -portfolio_calmar_ratio(weights, returns, mean_returns)
-
 def portfolio_volatility(weights, mean_returns, cov_matrix):
     return portfolio_performance(weights, mean_returns, cov_matrix)[1]
 
@@ -224,15 +221,15 @@ weights_treynor = opt_treynor.x
 ret_treynor, vol_treynor = portfolio_performance(weights_treynor, mean_returns, cov_matrix)
 treynor_max = portfolio_treynor_ratio(weights_treynor, returns, market_returns, mean_returns, risk_free_rate)
 
-# 4. Max Calmar Ratio
+# 4. Min Calmar Ratio
 opt_calmar = sco.minimize(
-    neg_calmar_ratio, init_guess,
+    portfolio_calmar_ratio, init_guess,
     args=(returns, mean_returns),
     method='SLSQP', bounds=bounds, constraints=constraints
 )
 weights_calmar = opt_calmar.x
 ret_calmar, vol_calmar = portfolio_performance(weights_calmar, mean_returns, cov_matrix)
-calmar_max = portfolio_calmar_ratio(weights_calmar, returns, mean_returns)
+calmar_min = portfolio_calmar_ratio(weights_calmar, returns, mean_returns)
 
 # 5. Minimum Volatility
 opt_min_vol = sco.minimize(
@@ -296,7 +293,7 @@ col1, col2, col3, col4, col5, col6 = st.columns(6)
 col1.metric("Max Sharpe Return", f"{ret_sharpe:.2%}", f"Sharpe: {sharpe_max:.2f}")
 col2.metric("Max Sortino Return", f"{ret_sortino:.2%}", f"Sortino: {sortino_max:.2f}")
 col3.metric("Max Treynor Return", f"{ret_treynor:.2%}", f"Treynor: {treynor_max:.2f}")
-col4.metric("Max Calmar Return", f"{ret_calmar:.2%}", f"Calmar: {calmar_max:.2f}")
+col4.metric("Min Calmar Return", f"{ret_calmar:.2%}", f"Calmar: {calmar_min:.2f}")
 col5.metric("Min Volatility Return", f"{ret_min_vol:.2%}", f"Vol: {vol_min_vol:.2%}")
 col6.metric("Sweet Spot Return", f"{ret_target:.2%}", f"Vol Cap: {max_vol_limit:.1%}")
 
@@ -352,7 +349,7 @@ fig.add_trace(go.Scatter(
     x=[vol_calmar], y=[ret_calmar],
     mode='markers',
     marker=dict(size=16, color='lightskyblue', symbol='hexagon2'),
-    name='Max Calmar Ratio'
+    name='Min Calmar Ratio'
 ))
 
 fig.add_trace(go.Scatter(
@@ -386,7 +383,7 @@ allocation_df = pd.DataFrame({
     'Max Sharpe (%)': (weights_sharpe * 100).round(2),
     'Max Sortino (%)': (weights_sortino * 100).round(2),
     'Max Treynor (%)': (weights_treynor * 100).round(2),
-    'Max Calmar (%)': (weights_calmar * 100).round(2),
+    'Min Calmar (%)': (weights_calmar * 100).round(2),
     'Min Volatility (%)': (weights_min_vol * 100).round(2),
     f'Target Volatility ({max_vol_limit:.1%}) (%)': (weights_target * 100).round(2)
 })
