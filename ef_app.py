@@ -35,17 +35,17 @@ st.sidebar.header("Portfolio Parameters")
 
 default_tickers = "SPY, BTC-USD, GC=F, QQQ, DIA"
 asset_presets = {
-    "US Large-Cap Stocks": "SPY",
+    "S&P 500": "SPY",
     "Global Stocks": "VT",
     "Developed-Market Stocks": "VEA",
     "Emerging-Market Stocks": "VWO",
     "US Small-Cap Stocks": "IWM",
-    "Technology Stocks": "QQQ",
+    "Nasdaq 100": "QQQ",
     "US Bonds": "BND",
     "Long-Term Treasuries": "TLT",
     "Inflation-Protected Bonds": "TIP",
     "US REITs": "VNQ",
-    "Gold": "GLD",
+    "Gold": "GC=F",
     "Commodities": "DBC",
     "Bitcoin": "BTC-USD",
     "Treasury Bills": "SGOV"
