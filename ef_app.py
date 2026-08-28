@@ -28,7 +28,42 @@ It identifies key optimal portfolios, individual asset risk-return profiles, and
 st.sidebar.header("Portfolio Parameters")
 
 default_tickers = "SPY, BTC-USD, GC=F, QQQ, DIA"
-ticker_input = st.sidebar.text_input("Enter Tickers (comma separated):", value=default_tickers)
+asset_presets = {
+    "US Large-Cap Stocks": "SPY",
+    "Global Stocks": "VT",
+    "Developed-Market Stocks": "VEA",
+    "Emerging-Market Stocks": "VWO",
+    "US Small-Cap Stocks": "IWM",
+    "Technology Stocks": "QQQ",
+    "US Bonds": "BND",
+    "Long-Term Treasuries": "TLT",
+    "Inflation-Protected Bonds": "TIP",
+    "US REITs": "VNQ",
+    "Gold": "GLD",
+    "Commodities": "DBC",
+    "Bitcoin": "BTC-USD",
+    "Treasury Bills": "SGOV"
+}
+
+if "selected_assets" not in st.session_state:
+    st.session_state.selected_assets = default_tickers.split(", ")
+
+st.sidebar.caption("Toggle asset classes to build a starting portfolio")
+preset_columns = st.sidebar.columns(2)
+for index, (asset_name, ticker) in enumerate(asset_presets.items()):
+    is_selected = ticker in st.session_state.selected_assets
+    button_label = f"{'✓ ' if is_selected else ''}{asset_name}"
+    if preset_columns[index % 2].button(button_label, key=f"asset_preset_{ticker}", use_container_width=True):
+        if is_selected:
+            st.session_state.selected_assets.remove(ticker)
+        else:
+            st.session_state.selected_assets.append(ticker)
+        st.session_state.ticker_input = ", ".join(st.session_state.selected_assets)
+
+if "ticker_input" not in st.session_state:
+    st.session_state.ticker_input = ", ".join(st.session_state.selected_assets)
+
+ticker_input = st.sidebar.text_input("Enter Tickers (comma separated):", key="ticker_input")
 tickers = [t.strip().upper() for t in ticker_input.split(",") if t.strip()]
 
 date_option = st.sidebar.radio("Date Range Option:", ("Max Available", "Custom Date Range"))
@@ -46,7 +81,7 @@ max_vol_limit = st.sidebar.slider(
     "Target Max Volatility / Risk Cap (%)", 
     min_value=5.0, 
     max_value=60.0, 
-    value=25.0, 
+    value=18.0, 
     step=0.5
 ) / 100.0
 
@@ -209,7 +244,7 @@ fig.add_trace(go.Scatter(
     x=ind_vols, y=ind_rets,
     mode='markers+text',
     text=valid_tickers,
-    textposition="top center",
+    textposition="middle right",
     marker=dict(size=12, color='orange', symbol='diamond'),
     name='Individual Assets'
 ))
@@ -241,7 +276,7 @@ fig.update_layout(
     yaxis_title="Annualized Expected Return",
     template="plotly_dark",
     height=600,
-    legend=dict(yanchor="top", y=0.99, xanchor="left", x=0.01)
+    legend=dict(yanchor="bottom", y=0.01, xanchor="right", x=0.99)
 )
 
 st.plotly_chart(fig, use_container_width=True)
@@ -255,3 +290,27 @@ allocation_df = pd.DataFrame({
 })
 
 st.dataframe(allocation_df.set_index('Ticker'), use_container_width=True)
+
+st.subheader("Asset Return Correlation")
+correlation_fig = go.Figure(data=go.Heatmap(
+    z=returns.corr().values,
+    x=valid_tickers,
+    y=valid_tickers,
+    zmin=-1,
+    zmax=1,
+    colorscale="RdBu",
+    text=returns.corr().round(2).values,
+    texttemplate="%{text}",
+    textfont=dict(size=12),
+    colorbar=dict(title="Correlation")
+))
+
+correlation_fig.update_layout(
+    title="Correlation of Daily Total Returns",
+    xaxis_title="Asset",
+    yaxis_title="Asset",
+    template="plotly_dark",
+    height=600
+)
+
+st.plotly_chart(correlation_fig, use_container_width=True)
