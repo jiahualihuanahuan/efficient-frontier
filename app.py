@@ -94,7 +94,7 @@ max_vol_limit = st.sidebar.slider(
 # ---------------------------------------------------------
 # Data Fetching & Processing
 # ---------------------------------------------------------
-@st.cache_data(ttl="1d", show_spinner=false)
+@st.cache_data(ttl="1d", show_spinner=False)
 def load_data(symbols, start, end, is_max):
     # auto_adjust=True bakes dividends and splits into the 'Close' price 
     # to accurately reflect Total Return.
